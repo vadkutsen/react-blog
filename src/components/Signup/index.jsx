@@ -1,5 +1,7 @@
 import React from 'react';
+import Axios from 'axios';
 import { validateAll } from 'indicative';
+import config from '../../config';
 
 class Signup extends React.Component {
     constructor() {
@@ -33,10 +35,31 @@ class Signup extends React.Component {
             password: 'required|string|min:6|confirmed'
         }
 
-        validateAll(data, rules)
+        const messages = {
+            required: 'The {{field}} is required.',
+            'email.email': 'The email is invalid.',
+            'password.confirmed': 'The password confirmation did not match.'
+        }
+        
+        validateAll(data, rules, messages)
             .then(() => {
                 // register the user
-                console.log('SUCCESS')
+                Axios.post(`${config.apiUrl}/auth/register`, {
+                    name: this.state.name,
+                    email: this.state.email,
+                    password: this.state.password
+                }).then(response => {
+                    //console.log(response)
+                    localStorage.setItem('user', JSON.stringify(response.data.data))
+                    this.props.history.push('/')
+                }).catch(errors => {
+                    //console.log(errors.response)
+                    const formattedErrors = {} 
+                    formattedErrors['email'] = errors.response.data['email'][0]
+                    this.setState({
+                        errors: formattedErrors
+                    })
+                })
             })
             .catch(errors => {
                 // show the errors to the user
@@ -60,21 +83,21 @@ class Signup extends React.Component {
                         <input type="text" name="name" onChange={this.handleInputChange} className="form-control" placeholder="Username" />
                         {
                             this.state.errors['name'] &&
-                            <smal className="text-danger">{this.state.errors['name']}</smal>
+                            <small className="text-danger">{this.state.errors['name']}</small>
                         }
                     </div>
                     <div className="form-group">
                         <input type="text" name="email" onChange={this.handleInputChange} className="form-control" placeholder="Email address" />
                         {
                             this.state.errors['email'] &&
-                            <smal className="text-danger">{this.state.errors['email']}</smal>
+                            <small className="text-danger">{this.state.errors['email']}</small>
                         }
                     </div>
                     <div className="form-group">
                         <input type="password" name="password" onChange={this.handleInputChange} className="form-control" placeholder="Password" />
                         {
                             this.state.errors['password'] &&
-                            <smal className="text-danger">{this.state.errors['password']}</smal>
+                            <small className="text-danger">{this.state.errors['password']}</small>
                         }
                     </div>
                     <div className="form-group">
