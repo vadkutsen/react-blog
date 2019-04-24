@@ -8,6 +8,7 @@ import CreateArticle from './components/CreateArticle';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import SingleArticle from './components/SingleArticle';
+import AuthService from './services/auth'
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 
@@ -28,6 +29,12 @@ class App extends React.Component {
         }
     }
     
+    setAuthUser = (authUser) => {
+        this.setState({
+            authUser
+        })
+    }
+    
     render() {
         const { location } = this.props
         return (
@@ -39,7 +46,7 @@ class App extends React.Component {
                 <Route exact path="/" component={Welcome} />
                 <Route path="/articles/create" component={CreateArticle} />
                 <Route path="/login" component={Login} />
-                <Route path="/signup" component={Signup} />
+                <Route path="/signup" render={(props) => <Signup {...props} registerUser={this.props.authService.registerUser} setAuthUser={this.setAuthUser} />} />
                 <Route path="/article/:slug" component={SingleArticle} />
                 {
                     location.pathname !== '/login' && location.pathname !== '/signup' &&
@@ -52,7 +59,7 @@ class App extends React.Component {
 
 const Main = withRouter((props) => {
     return(
-       <App {...props} />
+       <App authService={new AuthService()} {...props} />
     )
 })
 
